@@ -11,7 +11,7 @@
         "botbuilder": "^3.13.0"
     },
     "engines": {
-        "node": "8.9.1"
+        "node": "^8.9.0"
     },
     "repository": {
         "type": "git",
