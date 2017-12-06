@@ -1,0 +1,22 @@
+{
+    "name": "anm-bot-demo",
+    "version": "0.0.1",
+    "description": "ANM demo Node.js bot",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "dependencies": {
+        "restify": "^6.3.0",
+        "botbuilder": "^3.13.0"
+    },
+    "engines": {
+        "node": "8.9.1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/glungu/anm-bot-demo"
+    },
+    "author": "Gennady Lungu",
+    "license": "MIT"
+}
