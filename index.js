@@ -21,8 +21,9 @@ function accessLuis(text, callback) {
     var serviceUrl = luisURL + "&q=" + text;
     // var resp = requestSync('GET', getURL);
     // var bodyObject = JSON.parse(resp.getBody());
-
-    request({'url' : serviceUrl, 'proxy' : 'http://10.232.233.70:8080'}, 
+        
+    // request({'url' : serviceUrl, 'proxy' : 'http://10.232.233.70:8080'},
+    request({'url' : serviceUrl}, 
         function (error, response, body) {
             var topScoringIntent = null;
             var topScoringIntentScore = null;
