@@ -1,6 +1,8 @@
 var restify = require('restify');
 var builder = require('botbuilder');
 var request = require('request');
+var anm = require('./anm');
+
 // var requestSync = require('sync-request');
 
 // var globalTunnel = require('global-tunnel');
@@ -23,9 +25,9 @@ function accessLuis(text, callback) {
     // var bodyObject = JSON.parse(resp.getBody());
     
     // proxy
-    // request({'url' : serviceUrl, 'proxy' : 'http://10.232.233.70:8080'},
+    request({'url' : serviceUrl, 'proxy' : 'http://10.232.233.70:8080'},
     // no proxy
-    request({'url' : serviceUrl}, 
+    // request({'url' : serviceUrl}, 
         function (error, response, body) {
             var topScoringIntent = null;
             var topScoringIntentScore = null;
@@ -49,6 +51,9 @@ function accessLuis(text, callback) {
                                 topScoringEntity = bodyObject.entities[i].entity;
                             }
                         }
+                    }
+                    if (entityName == "ANM.Subscriber.Email" && topScoringEntity != null) {
+                        topScoringEntity = topScoringEntity.replace(/ /g, '');
                     }
                     console.log('### topScoringIntent: ' + topScoringIntent + ", " 
                                 + "score: " + topScoringIntentScore + ", "
@@ -203,8 +208,33 @@ bot.dialog('ShowIntent', [
 
 bot.dialog('Yes', [
     function (session, args, next) {
-        if (session.userData.intent) {
-            session.send("The change has been applied to the system. Enjoy!");
+        if (session.userData.intent == "ANM.ChangeLanguage") {
+            // add email channel
+            var languageId = session.userData.entity;
+            if (languageId == "english") {
+                languageId = "en-US";
+            } else if (languageId == "hebrew") {
+                languageId = "iw-IL";
+            } else if (languageId == "french") {
+                languageId = "fr-FR";
+            } else if (languageId == "russian") {
+                languageId = "ru-RU";
+            }
+            var result = anm.updateSubscriber(languageId, null);
+            if (result) {
+                session.send("The change has been applied to the system. Enjoy!");
+            } else {
+                session.send('ERROR! Please try later');
+            }
+        } else if (session.userData.intent == "ANM.AddChannel.Email") {
+            // change language
+            var emailAddress = session.userData.entity;
+            var result = anm.updateSubscriber(null, emailAddress);
+            if (result) {
+                session.send("The change has been applied to the system. Enjoy!");
+            } else {
+                session.send('ERROR! Please try later');
+            }
         }
         // session.reset();
         // session.endDialog();

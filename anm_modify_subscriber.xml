@@ -1,0 +1,33 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v3="http://amdocs.com/wsdl/service/nm/provisioning/v3_0" xmlns:v2="http://amdocs.com/schema/service/asmfw/types/v2_0" xmlns:v31="http://amdocs.com/schema/service/nm/provisioning/types/v3_0">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <v3:modifySubscribersRequest>
+         <apiVersion>0</apiVersion>
+         <subscriber xsi:type="v31:IndividualSubscriber" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <v2:id>
+               <v2:id>user-1</v2:id>
+            </v2:id>
+            <v2:languageId>%language_id%</v2:languageId>
+            <v31:filter>
+               <!--1 or more repetitions:-->
+               <v31:eventName>Charging</v31:eventName>
+               <v31:function>NOTIF_FILTER</v31:function>
+               <v31:type>RESTRICTED</v31:type>
+            </v31:filter>
+            <v31:enabled>true</v31:enabled>
+            <v31:channel xsi:type="v31:SmsChannel">
+                <v31:type>SMS</v31:type>
+                <v31:kind>NORMAL</v31:kind>
+                <v31:enabled>true</v31:enabled>
+                <v31:address>+79264996379</v31:address>
+            </v31:channel>
+            <v31:channel xsi:type="v31:EmailChannel">
+                <v31:type>EMAIL</v31:type>
+                <v31:kind>NORMAL</v31:kind>
+                <v31:enabled>%email_enabled%</v31:enabled>
+                <v31:toAddress>%email_address%</v31:toAddress>
+            </v31:channel>
+         </subscriber>
+      </v3:modifySubscribersRequest>
+   </soapenv:Body>
+</soapenv:Envelope>

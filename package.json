@@ -7,8 +7,10 @@
         "start": "node index.js"
     },
     "dependencies": {
+        "botbuilder": "^3.13.0",
+        "fs": "0.0.1-security",
         "restify": "^6.3.0",
-        "botbuilder": "^3.13.0"
+        "sync-request": "^4.1.0"
     },
     "engines": {
         "node": "^8.9.0"

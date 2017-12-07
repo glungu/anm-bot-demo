@@ -1,0 +1,10 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v3="http://amdocs.com/wsdl/service/nm/provisioning/v3_0" xmlns:v2="http://amdocs.com/schema/service/asmfw/types/v2_0">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <v3:getSubscriberRequest>
+         <subscriberId>
+            <v2:id>user-1</v2:id>
+         </subscriberId>
+      </v3:getSubscriberRequest>
+   </soapenv:Body>
+</soapenv:Envelope>
