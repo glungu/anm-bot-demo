@@ -24,11 +24,12 @@ function accessLuis(text, callback) {
     
     // proxy
     // request({'url' : serviceUrl, 'proxy' : 'http://10.232.233.70:8080'},
+    // no proxy
     request({'url' : serviceUrl}, 
         function (error, response, body) {
             var topScoringIntent = null;
             var topScoringIntentScore = null;
-            var topScoringIntentChannel = null;
+            var topScoringEntity = null;
             if (!error && response.statusCode == 200) {
                 console.log('### response from LUIS: ' + body);
                 var bodyObject = JSON.parse(body);
@@ -39,8 +40,8 @@ function accessLuis(text, callback) {
                     var entityName = null;
                     if (topScoringIntent == "ANM.ChangeLanguage") {
                         entityName = "ANM.NewLanguage";
-                    } else if (topScoringIntent = "ANM.AddChannel") {
-                        entityName = "ANM.NewChannel";
+                    } else if (topScoringIntent = "ANM.AddChannel.Email") {
+                        entityName = "ANM.Subscriber.Email";
                     }
                     if (entityName) {
                         for (var i in bodyObject.entities) {
@@ -103,6 +104,11 @@ var bot = new builder.UniversalBot(connector, [
                 session.userData.intent = result.intent;
                 session.userData.entity = result.entity;
                 session.beginDialog("ShowIntent");
+            } else {
+                session.send("Your intent is not clear to me...");
+                session.userData = {};
+                session.clearDialogStack();
+                session.reset();
             }
         });
         // session.endConversation("Bye");
@@ -130,8 +136,8 @@ bot.dialog('ShowIntent', [
         var entity = session.userData.entity;
 
         if (entity == null) {
-            if (intent == "ANM.AddChannel") {
-                session.beginDialog("AskChannel");
+            if (intent == "ANM.AddChannel.Email") {
+                session.beginDialog("AskEmail");
             } else if (intent == "ANM.ChangeLanguage") {
                 session.beginDialog("AskLanguage");
             }
@@ -148,36 +154,45 @@ bot.dialog('ShowIntent', [
     },
     function (session, results) {
         console.log("### step 3");
+        var intentTitle = "";
+        var intentMsg = "";
+        if (session.userData.intent == "ANM.AddChannel.Email") {
+            intentTitle = "Adding notification channel";
+            intentMsg = "We will send you notifications by email to '" + session.userData.entity + "'.";
+        } else if (session.userData.intent == "ANM.ChangeLanguage") {
+            intentTitle = "Changing notification language";
+            intentMsg = "We will write you notifications in " + session.userData.entity + "!";
+        }
         var msg = new builder.Message(session).attachments([
-            {
-                contentType: "application/vnd.microsoft.card.adaptive",
-                content: {
-                    type: "AdaptiveCard",
-                    body: [
-                        {
-                            "type": "TextBlock",
-                            "text": "Response from LUIS",
-                            "size": "large",
-                            "weight": "bolder"
-                        },
-                        {
-                            "type": "TextBlock",
-                            "text": "Intent: " + session.userData.intent
-                        },
-                        {
-                            "type": "TextBlock",
-                            "text": "Entity: " + session.userData.entity
-                        }
-                    ]
-                }
-            },
+            // {
+            //     contentType: "application/vnd.microsoft.card.adaptive",
+            //     content: {
+            //         type: "AdaptiveCard",
+            //         body: [
+            //             {
+            //                 "type": "TextBlock",
+            //                 "text": "Response from LUIS",
+            //                 "size": "large",
+            //                 "weight": "bolder"
+            //             },
+            //             {
+            //                 "type": "TextBlock",
+            //                 "text": "Intent: " + session.userData.intent
+            //             },
+            //             {
+            //                 "type": "TextBlock",
+            //                 "text": "Entity: " + session.userData.entity
+            //             }
+            //         ]
+            //     }
+            // },
             new builder.HeroCard(session)
-            // .title("Classic Gray T-Shirt")
-            // .subtitle("100% Soft and Luxurious Cotton")
-            .text("Is it correct?")
+            .title(intentTitle)
+            // .subtitle(intentMsg)
+            .text(intentMsg + " Please confirm")
             .buttons([
-                builder.CardAction.imBack(session, "Accept", "Yes"),
-                builder.CardAction.imBack(session, "Reject", "No")
+                builder.CardAction.imBack(session, "Confirm", "Yes"),
+                builder.CardAction.imBack(session, "Cancel", "No")
             ])
         ]);
         builder.Prompts.choice(session, msg, ["Yes", "No"]);
@@ -189,7 +204,7 @@ bot.dialog('ShowIntent', [
 bot.dialog('Yes', [
     function (session, args, next) {
         if (session.userData.intent) {
-            session.send("Confirmed: it's a Yes");
+            session.send("The change has been applied to the system. Enjoy!");
         }
         // session.reset();
         // session.endDialog();
@@ -197,12 +212,12 @@ bot.dialog('Yes', [
         session.clearDialogStack();
         session.reset();
     }
-]).triggerAction({ matches: /(yes|accept)/i });
+]).triggerAction({ matches: /(yes|confirm)/i });
 
 bot.dialog('No', [
     function (session, args, next) {
         if (session.userData.intent) {
-            session.send("Confirmed: it's a No");
+            session.send("No change was applied.");
         }
         // session.reset();
         // session.endDialog();
@@ -210,11 +225,11 @@ bot.dialog('No', [
         session.clearDialogStack();
         session.reset();
     }
-]).triggerAction({ matches: /(no|reject)/i });
+]).triggerAction({ matches: /(no|cancel)/i });
 
-bot.dialog('AskChannel', [
+bot.dialog('AskEmail', [
     function (session, args, next) {
-        builder.Prompts.text(session, "By means of what channel?");    
+        builder.Prompts.text(session, "Please tell me your email");    
     },
     function (session, results) {
         console.log("### check channel result");
