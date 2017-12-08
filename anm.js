@@ -10,7 +10,7 @@ npm install sync-request
 */
 function updateSubscriber(languageId, emailAddress) {
   // var soap_url = 'http://10.233.184.202:8070/ws/ANMProvisioningServiceV3';
-  var soap_url = 'http://5e922d19.ngrok.io:8070/ws/ANMProvisioningServiceV3';
+  var soap_url = 'http://5e922d19.ngrok.io/ws/ANMProvisioningServiceV3';
 
   console.log('Loading subscriber');
   var subscriber = getSubscriber(soap_url);
