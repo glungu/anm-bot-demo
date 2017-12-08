@@ -162,7 +162,27 @@ bot.dialog('ShowIntent', [
     function (session, results, next) {
         console.log("### step 2");
         if (results.response != null) {
-            session.userData.entity = results.response;
+            var res = results.response;
+            console.log("### 1 res: " + res);
+            var ind = res.indexOf("<a href");
+            if (ind && ind >= 0) {
+                console.log("### 2 res: " + res);
+                ind = res.indexOf(">");
+                if (ind && ind >= 0) {
+                    console.log("### 3 res: " + res);
+                    res = res.substring(ind);
+                    console.log("### 4 res: " + res);
+                    ind = res.indexOf("</a>");
+                    if (ind && ind >= 0) {
+                        console.log("### 5 res: " + res);
+                        res = res.substring(0, ind);
+                        console.log("### 6 res: " + res);
+                        session.userData.entity = res;
+                    }
+                }
+            } else {
+                session.userData.entity = results.response;
+            }         
         } 
         next();
     },
@@ -271,19 +291,6 @@ bot.dialog('AskEmail', [
         builder.Prompts.text(session, "Please tell me your email");    
     },
     function (session, results) {
-        var res = results.response;
-        var ind = res.indexOf("<a href");
-        if (ind && ind >= 0) {
-            ind = res.indexOf(">");
-            if (ind && ind >= 0) {
-                res = res.substring(ind);
-                ind = res.indexOf("</a>");
-                if (ind && ind >= 0) {
-                    res = res.substring(0, ind);
-                    results.response = res;
-                }
-            }
-        }         
         session.endDialogWithResult(results);
     }
 ]);
