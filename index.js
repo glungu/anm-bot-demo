@@ -25,9 +25,9 @@ function accessLuis(text, callback) {
     // var bodyObject = JSON.parse(resp.getBody());
     
     // proxy
-    request({'url' : serviceUrl, 'proxy' : 'http://10.232.233.70:8080'},
+    // request({'url' : serviceUrl, 'proxy' : 'http://10.232.233.70:8080'},
     // no proxy
-    // request({'url' : serviceUrl}, 
+    request({'url' : serviceUrl}, 
         function (error, response, body) {
             var topScoringIntent = null;
             var topScoringIntentScore = null;
@@ -36,7 +36,7 @@ function accessLuis(text, callback) {
                 console.log('### response from LUIS: ' + body);
                 var bodyObject = JSON.parse(body);
 
-                if (undefined != bodyObject && undefined != bodyObject.topScoringIntent.intent) {
+                if (undefined != bodyObject && undefined != bodyObject.topScoringIntent && undefined != bodyObject.topScoringIntent.intent) {
                     topScoringIntent = bodyObject.topScoringIntent.intent;
                     topScoringIntentScore = bodyObject.topScoringIntent.score;
                     var entityName = null;
@@ -44,6 +44,8 @@ function accessLuis(text, callback) {
                         entityName = "ANM.NewLanguage";
                     } else if (topScoringIntent = "ANM.AddChannel.Email") {
                         entityName = "ANM.Subscriber.Email";
+                    } else {
+                        return null;
                     }
                     if (entityName) {
                         for (var i in bodyObject.entities) {
@@ -58,7 +60,7 @@ function accessLuis(text, callback) {
                     console.log('### topScoringIntent: ' + topScoringIntent + ", " 
                                 + "score: " + topScoringIntentScore + ", "
                                 + "entity: " + topScoringEntity);
-                } 
+                }  
             } else {
                 console.log('### Error from LUIS: ' + error + ', ' + response + ', body: ' +  body);
             }					
@@ -145,6 +147,11 @@ bot.dialog('ShowIntent', [
                 session.beginDialog("AskEmail");
             } else if (intent == "ANM.ChangeLanguage") {
                 session.beginDialog("AskLanguage");
+            } else {
+                session.send("Your intent is not clear to me...");
+                session.userData = {};
+                session.clearDialogStack();
+                session.reset();
             }
         } else {
             next();
@@ -154,8 +161,13 @@ bot.dialog('ShowIntent', [
         console.log("### step 2");
         if (results.response != null) {
             session.userData.entity = results.response;
-        } 
-        next();
+            next();
+        } else {
+            session.send("Your intent is not clear to me...");
+            session.userData = {};
+            session.clearDialogStack();
+            session.reset();
+        }
     },
     function (session, results) {
         console.log("### step 3");
@@ -214,7 +226,7 @@ bot.dialog('Yes', [
             if (languageId == "english") {
                 languageId = "en-US";
             } else if (languageId == "hebrew") {
-                languageId = "iw-IL";
+                languageId = "he-IL";
             } else if (languageId == "french") {
                 languageId = "fr-FR";
             } else if (languageId == "russian") {
@@ -262,7 +274,15 @@ bot.dialog('AskEmail', [
         builder.Prompts.text(session, "Please tell me your email");    
     },
     function (session, results) {
-        console.log("### check channel result");
+        session.endDialogWithResult(results);
+    }
+]);
+
+bot.dialog('AskLanguage', [
+    function (session, args, next) {
+        builder.Prompts.text(session, "Please tell me the language");    
+    },
+    function (session, results) {
         session.endDialogWithResult(results);
     }
 ]);

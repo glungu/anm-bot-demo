@@ -9,7 +9,8 @@ npm install sync-request
   toAddress for example 'andreyp@amdocs.com'. If parameter is null field in ANM will be updated by current value
 */
 function updateSubscriber(languageId, emailAddress) {
-  var soap_url = 'http://10.233.184.202:8070/ws/ANMProvisioningServiceV3';
+  // var soap_url = 'http://10.233.184.202:8070/ws/ANMProvisioningServiceV3';
+  var soap_url = 'http://5e922d19.ngrok.io:8070/ws/ANMProvisioningServiceV3';
 
   console.log('Loading subscriber');
   var subscriber = getSubscriber(soap_url);
@@ -80,14 +81,18 @@ function getSubscriber(soap_url) {
 
     var pattern = new RegExp(/<(.*):languageId>(.*)<\/(.*):languageId>/g);
     var match = pattern.exec(body);
-    subscriber['languageId'] = match[2];
+    if (match) {
+      subscriber['languageId'] = match[2];
+    }
     console.log('languageId=' + subscriber['languageId']);
 
     pattern = new RegExp(/<(.*):toAddress>(.*)<\/(.*):toAddress>/g);
     match = pattern.exec(body);
-    subscriber['emailAddress'] = match[2];
+    if (match) {
+      subscriber['emailAddress'] = match[2];
+    }
     console.log('emailAddress=' + subscriber['emailAddress']);
-
+    
     if (subscriber['emailAddress'] != null && subscriber['emailAddress'] != "") {
       subscriber['emailEnabled'] = 'true';
     }
