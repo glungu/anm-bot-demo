@@ -271,6 +271,17 @@ bot.dialog('AskEmail', [
         builder.Prompts.text(session, "Please tell me your email");    
     },
     function (session, results) {
+        var ind = results.indexOf("<a href");
+        if (ind && ind >= 0) {
+            ind = results.indexOf(">");
+            if (ind && ind >= 0) {
+                results = results.substring(ind);
+                ind = results.indexOf("</a>");
+                if (ind && ind >= 0) {
+                    results = results.substring(0, ind);
+                }
+            }
+        }
         session.endDialogWithResult(results);
     }
 ]);
