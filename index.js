@@ -42,11 +42,9 @@ function accessLuis(text, callback) {
                     var entityName = null;
                     if (topScoringIntent == "ANM.ChangeLanguage") {
                         entityName = "ANM.NewLanguage";
-                    } else if (topScoringIntent = "ANM.AddChannel.Email") {
+                    } else if (topScoringIntent == "ANM.AddChannel.Email") {
                         entityName = "ANM.Subscriber.Email";
-                    } else {
-                        return null;
-                    }
+                    } 
                     if (entityName) {
                         for (var i in bodyObject.entities) {
                             if (bodyObject.entities[i].type == entityName) {
@@ -142,32 +140,31 @@ bot.dialog('ShowIntent', [
         var intent = session.userData.intent;
         var entity = session.userData.entity;
 
-        if (entity == null) {
-            if (intent == "ANM.AddChannel.Email") {
+        if (intent == "ANM.AddChannel.Email") {
+            if (entity == null) {
                 session.beginDialog("AskEmail");
-            } else if (intent == "ANM.ChangeLanguage") {
+            } else {
+                next();
+            }
+        } else if (intent == "ANM.ChangeLanguage") {
+            if (entity == null) {
                 session.beginDialog("AskLanguage");
             } else {
-                session.send("Your intent is not clear to me...");
-                session.userData = {};
-                session.clearDialogStack();
-                session.reset();
+                next();
             }
-        } else {
-            next();
-        } 
-    },
-    function (session, results, next) {
-        console.log("### step 2");
-        if (results.response != null) {
-            session.userData.entity = results.response;
-            next();
         } else {
             session.send("Your intent is not clear to me...");
             session.userData = {};
             session.clearDialogStack();
             session.reset();
         }
+    },
+    function (session, results, next) {
+        console.log("### step 2");
+        if (results.response != null) {
+            session.userData.entity = results.response;
+        } 
+        next();
     },
     function (session, results) {
         console.log("### step 3");
