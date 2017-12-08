@@ -271,7 +271,7 @@ bot.dialog('AskEmail', [
         builder.Prompts.text(session, "Please tell me your email");    
     },
     function (session, results) {
-        var res = results.toString();
+        var res = results.response;
         var ind = res.indexOf("<a href");
         if (ind && ind >= 0) {
             ind = res.indexOf(">");
@@ -280,10 +280,11 @@ bot.dialog('AskEmail', [
                 ind = res.indexOf("</a>");
                 if (ind && ind >= 0) {
                     res = res.substring(0, ind);
+                    results.response = res;
                 }
             }
-        }
-        session.endDialogWithResult(res);
+        }         
+        session.endDialogWithResult(results);
     }
 ]);
 
