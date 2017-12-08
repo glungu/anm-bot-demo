@@ -163,20 +163,15 @@ bot.dialog('ShowIntent', [
         console.log("### step 2");
         if (results.response != null) {
             var res = results.response;
-            console.log("### 1 res: " + res);
             var ind = res.indexOf("<a href");
-            if (ind && ind >= 0) {
-                console.log("### 2 res: " + res);
+            if (ind >= 0) {
+                console.log("### response with reference: " + res);
                 ind = res.indexOf(">");
-                if (ind && ind >= 0) {
-                    console.log("### 3 res: " + res);
-                    res = res.substring(ind);
-                    console.log("### 4 res: " + res);
+                if (ind >= 0) {
+                    res = res.substring(ind + 1);
                     ind = res.indexOf("</a>");
-                    if (ind && ind >= 0) {
-                        console.log("### 5 res: " + res);
+                    if (ind >= 0) {
                         res = res.substring(0, ind);
-                        console.log("### 6 res: " + res);
                         session.userData.entity = res;
                     }
                 }
