@@ -63,7 +63,7 @@ function accessLuis(text, callback) {
                 console.log('### Error from LUIS: ' + error + ', ' + response + ', body: ' +  body);
             }					
 
-            if (topScoringIntent != null && topScoringIntent != "None" && topScoringIntentScore > 0.5) {
+            if (topScoringIntent != null && topScoringIntent != "None" && topScoringIntentScore > 0.7) {
                 console.log("### returning result: " + topScoringIntent);
                 var result = {
                     intent: topScoringIntent,
