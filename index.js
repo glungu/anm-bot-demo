@@ -55,6 +55,9 @@ function accessLuis(text, callback) {
                     if (entityName == "ANM.Subscriber.Email" && topScoringEntity != null) {
                         topScoringEntity = topScoringEntity.replace(/ /g, '');
                     }
+                    if (entityName == "ANM.NewLanguage" && topScoringEntity != null) {
+                        topScoringEntity = startUppercase(topScoringEntity);
+                    }
                     console.log('### topScoringIntent: ' + topScoringIntent + ", " 
                                 + "score: " + topScoringIntentScore + ", "
                                 + "entity: " + topScoringEntity);
@@ -154,30 +157,19 @@ bot.dialog('ShowIntent', [
             }
         } else {
             session.send("Your intent is not clear to me...");
-            session.userData = {};
-            session.clearDialogStack();
-            session.reset();
+            resetSession(session);
         }
     },
     function (session, results, next) {
         console.log("### step 2");
         if (results.response != null) {
             var res = results.response;
-            var ind = res.indexOf("<a href");
-            if (ind >= 0) {
-                console.log("### response with reference: " + res);
-                ind = res.indexOf(">");
-                if (ind >= 0) {
-                    res = res.substring(ind + 1);
-                    ind = res.indexOf("</a>");
-                    if (ind >= 0) {
-                        res = res.substring(0, ind);
-                        session.userData.entity = res;
-                    }
-                }
-            } else {
-                session.userData.entity = results.response;
-            }         
+            if (session.userData.intent == "ANM.AddChannel.Email") {
+                res = removeHref(res);
+            } else if (session.userData.intent == "ANM.ChangeLanguage") {
+                res = startUppercase(res);
+            }
+            session.userData.entity = res;
         } 
         next();
     },
@@ -189,6 +181,11 @@ bot.dialog('ShowIntent', [
             intentTitle = "Adding notification channel";
             intentMsg = "We will send you notifications by email to '" + session.userData.entity + "'.";
         } else if (session.userData.intent == "ANM.ChangeLanguage") {
+            // if (getLanguageId(session.userData.entity) == null) {
+            //     session.send("Suported languages: English, Russian, Hebrew, French");
+            //     resetSession(session);
+            //     return;
+            // }
             intentTitle = "Changing notification language";
             intentMsg = "We will write you notifications in " + session.userData.entity + "!";
         }
@@ -225,8 +222,6 @@ bot.dialog('ShowIntent', [
             ])
         ]);
         builder.Prompts.choice(session, msg, ["Yes", "No"]);
-        // session.send(msg);
-        // builder.Prompts.text(session, "Is it correct?");
     }
 ]);
 
@@ -234,16 +229,7 @@ bot.dialog('Yes', [
     function (session, args, next) {
         if (session.userData.intent == "ANM.ChangeLanguage") {
             // add email channel
-            var languageId = session.userData.entity;
-            if (languageId == "english") {
-                languageId = "en-US";
-            } else if (languageId == "hebrew") {
-                languageId = "he-IL";
-            } else if (languageId == "french") {
-                languageId = "fr-FR";
-            } else if (languageId == "russian") {
-                languageId = "ru-RU";
-            }
+            var languageId = getLanguageId(session.userData.entity);
             var result = anm.updateSubscriber(languageId, null);
             if (result) {
                 session.send("The change has been applied to the system. Enjoy!");
@@ -260,11 +246,7 @@ bot.dialog('Yes', [
                 session.send('ERROR! Please try later');
             }
         }
-        // session.reset();
-        // session.endDialog();
-        session.userData = {};
-        session.clearDialogStack();
-        session.reset();
+        resetSession(session);
     }
 ]).triggerAction({ matches: /(yes|confirm)/i });
 
@@ -273,11 +255,7 @@ bot.dialog('No', [
         if (session.userData.intent) {
             session.send("No change was applied.");
         }
-        // session.reset();
-        // session.endDialog();
-        session.userData = {};
-        session.clearDialogStack();
-        session.reset();
+        resetSession(session);
     }
 ]).triggerAction({ matches: /(no|cancel)/i });
 
@@ -298,3 +276,42 @@ bot.dialog('AskLanguage', [
         session.endDialogWithResult(results);
     }
 ]);
+
+function removeHref(value) {
+    var res = value;
+    var ind = res.indexOf("<a href");
+    if (ind >= 0) {
+        console.log("### response with reference: " + res);
+        ind = res.indexOf(">");
+        if (ind >= 0) {
+            res = res.substring(ind + 1);
+            ind = res.indexOf("</a>");
+            if (ind >= 0) {
+                res = res.substring(0, ind);
+            }
+        }
+    }
+    return res;         
+}
+
+function startUppercase(value) {
+    var res = value;
+    if (res != null) { 
+        return res.charAt(0).toUpperCase() + res.slice(1).toLowerCase();
+    } 
+    return res;
+}
+
+function getLanguageId(lang) {
+    if (lang == "English") return "en-US";
+    if (lang == "Hebrew") return "he-IL";
+    if (lang == "French") return "fr-FR";
+    if (lang == "Russian") return "ru-RU";
+    return null;
+}
+
+function resetSession(session) {
+    session.userData = {};
+    session.clearDialogStack();
+    session.reset();
+}
