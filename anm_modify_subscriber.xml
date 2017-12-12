@@ -19,7 +19,7 @@
                 <v31:type>SMS</v31:type>
                 <v31:kind>NORMAL</v31:kind>
                 <v31:enabled>true</v31:enabled>
-                <v31:address>+79264996379</v31:address>
+                <v31:address>%phone_number%</v31:address>
             </v31:channel>
             <v31:channel xsi:type="v31:EmailChannel">
                 <v31:type>EMAIL</v31:type>

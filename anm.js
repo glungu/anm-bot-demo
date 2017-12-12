@@ -34,6 +34,7 @@ function updateSubscriber(languageId, emailAddress) {
     data = data.replace(/%language_id%/g, subscriber['languageId']);
     data = data.replace(/%email_address%/g, subscriber['emailAddress']);
     data = data.replace(/%email_enabled%/g, subscriber['emailEnabled']);
+    data = data.replace(/%phone_number%/g, subscriber['phoneNumber']);
     
     console.log('### update soap: ');
     console.log(data);
@@ -97,6 +98,12 @@ function getSubscriber(soap_url) {
       subscriber['emailEnabled'] = 'true';
     }
 
+    pattern = new RegExp(/<(.*):address>(.*)<\/(.*):address>/g);
+    match = pattern.exec(body);
+    if (match) {
+      subscriber['phoneNumber'] = match[2];
+    }
+    
     subscriber['isValid'] = true;
   }
 
